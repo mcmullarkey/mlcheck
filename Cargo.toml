@@ -5,9 +5,9 @@ authors = ["Michael Mullarkey <mullarkey.mike@gmail.com>"]
 license = "MIT OR Apache-2.0"
 description = "A tool to check files for ML best practices"
 readme = "README.md"
-homepage = "https://github.com/you/grrs"
-repository = "https://github.com/you/grrs"
-keywords = ["cli", "search", "demo"]
+homepage = "https://github.com/mcmullarkey/mlcheck"
+repository = "https://github.com/mcmullarkey/mlcheck"
+keywords = ["cli", "search", "ml"]
 categories = ["command-line-utilities"]
 edition = "2021"
 
