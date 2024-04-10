@@ -1,0 +1,23 @@
+[package]
+name = "mlcheck"
+version = "0.1.0"
+authors = ["Michael Mullarkey <mullarkey.mike@gmail.com>"]
+license = "MIT OR Apache-2.0"
+description = "A tool to check files for ML best practices"
+readme = "README.md"
+homepage = "https://github.com/you/grrs"
+repository = "https://github.com/you/grrs"
+keywords = ["cli", "search", "demo"]
+categories = ["command-line-utilities"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+clap = { version = "4.0", features = ["derive"] }
+anyhow = "1.0"
+log = "0.4.21"
+env_logger = "0.11.3"
+clap-verbosity-flag = "2.2.0"
+chrono = "0.4.37"
+colored = "2.1.0"
