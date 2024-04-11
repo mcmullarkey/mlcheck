@@ -2,71 +2,125 @@ use anyhow::{Context, Result};
 use chrono::Utc;
 use clap::Parser;
 use colored::*;
-use log::info;
-use std::fs::{OpenOptions};
-use std::io::{Write};
-use std::path::{Path};
+use log::{info, error};
+use std::fs::{self, OpenOptions};
+use std::io::{self, Write};
+use std::path::{Path, PathBuf};
 
 fn main() -> Result<()> {
     env_logger::init();
-    info!("starting up");
+    info!("Starting up");
 
+    // Define checks
+    let checks = vec![
+        Check {
+            target: String::from("train_test_split"),
+            description: String::from("Splits data into train and test"),
+        },
+        Check {
+            target: String::from("stratify"),
+            description: String::from("Ensures class balance in train and test datasets"),
+        },
+        Check {
+            target: String::from("random_state"),
+            description: String::from("Sets seed for reproducible train and test datasets")
+        }
+    ];
+
+    // Parse command-line arguments
     let args = Cli::parse();
 
-    let content = std::fs::read_to_string(&args.path)
-        .with_context(|| format!("could not read file `{}`", args.path.display()))?;
+    validate_arguments(&args)?;
 
-    let pattern_found = content.lines().any(|line| line.contains(&args.target));
+    let content = read_file_content(&args.path)?;
 
     let output_path = Path::new(&args.output);
-
-    if !output_path.exists() {
-        create_csv_with_header(&output_path)?;
-    }
 
     let mut output_file = OpenOptions::new()
         .append(true)
         .create(true)
         .open(&output_path)
-        .with_context(|| format!("could not open file `{}`", output_path.display()))?;
+        .with_context(|| format!("Could not open file `{}`", output_path.display()))?;
 
-    writeln!(
-        output_file,
-        "{},{},{},{}",
-        args.path.file_name().unwrap().to_string_lossy(),
-        args.target,
-        pattern_found,
-        Utc::now()
-    )
-    .with_context(|| format!("failed to write data to CSV file"))?;
-
-    if pattern_found {
-        println!(
-            "{}",
-            "Machine Learning Checklist:\nSplits data into train and test: ".to_owned() + &"pass".bold().truecolor(0, 165, 255).to_string()
-        );
-    } else {
-        println!(
-            "{}",
-            "Machine Learning Checklist:\nSplits data into train and test: ".to_owned() + &"fail".bold().truecolor(255, 165, 0).to_string()
-        );
+    // Write CSV header if file is empty
+    if output_file.metadata()?.len() == 0 {
+        write_csv_header(&mut output_file)?;
     }
 
-    info!("results appended to {}", output_path.display());
+    // Perform checks
+    for check in &checks {
+        let pattern_found = content.lines().any(|line| line.contains(&check.target));
+
+        write_check_result(&mut output_file, &args.path, &check, pattern_found)?;
+
+        display_check_result(&check, pattern_found);
+    }
+
+    info!("Results appended to {}", output_path.display());
 
     Ok(())
 }
 
-/// Search for a pattern in a file and display the lines that contain it.
+/// Struct representing a check.
+#[derive(Debug)]
+struct Check {
+    target: String,
+    description: String,
+}
+
+/// Validate command-line arguments.
+fn validate_arguments(args: &Cli) -> Result<()> {
+    if !args.path.exists() {
+        return Err(anyhow::anyhow!("Input file does not exist"));
+    }
+    Ok(())
+}
+
+/// Read content from the specified file.
+fn read_file_content(path: &PathBuf) -> Result<String> {
+    fs::read_to_string(path).with_context(|| format!("Could not read file `{}`", path.display()))
+}
+
+/// Write CSV header if file is empty.
+fn write_csv_header(output_file: &mut fs::File) -> Result<()> {
+    writeln!(
+        output_file,
+        "file_name,target,description,detected,datetime"
+    )
+    .with_context(|| "Failed to write header to CSV file")
+}
+
+/// Write check result to the CSV file.
+fn write_check_result(output_file: &mut fs::File, path: &PathBuf, check: &Check, pattern_found: bool) -> Result<()> {
+    writeln!(
+        output_file,
+        "{},{},{},{},{}",
+        path.file_name().ok_or_else(|| anyhow::anyhow!("Could not get file name"))?.to_string_lossy(),
+        check.target,
+        check.description,
+        pattern_found,
+        Utc::now()
+    )
+    .with_context(|| "Failed to write check result to CSV file")
+}
+
+/// Display the result of a check.
+fn display_check_result(check: &Check, pattern_found: bool) {
+    let status = if pattern_found {
+        format!("present").bold().truecolor(0, 165, 255).to_string()
+    } else {
+        format!("absent").bold().truecolor(255, 165, 0).to_string()
+    };
+    println!("{}: {}", check.description, status);
+}
+
+/// Command-line arguments structure.
 #[derive(Debug, Parser)]
 #[clap(name = "pattern_search")]
 struct Cli {
-    /// The target pattern to look for
-    #[clap(short, long, default_value = "train_test_split")]
-    target: String,
     /// The path to the file to read
     #[clap(short, long)]
-    path: std::path::PathBuf,
+    path: PathBuf,
     /// The name of the output CSV file
     #[clap(short, long, default_value = "output.csv")]
     output: String,
@@ -75,18 +129,6 @@ struct Cli {
     verbose: clap_verbosity_flag::Verbosity,
 }
 
-fn create_csv_with_header(path: &Path) -> Result<()> {
-    let mut output_file = OpenOptions::new()
-        .write(true)
-        .create_new(true)
-        .open(path)
-        .with_context(|| format!("could not create file `{}`", path.display()))?;
 
-    writeln!(
-        output_file,
-        "file_name,target,detected,datetime"
-    )
-    .with_context(|| format!("failed to write header to CSV file"))?;
 
-    Ok(())
-}
+
