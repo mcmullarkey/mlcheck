@@ -1,24 +1,46 @@
-file_name,target,detected,datetime
-no_train_test_split.py,train_test_split,false,2024-04-10 22:29:57.884417 UTC
-yes_train_test_split.py,train_test_split,true,2024-04-10 22:30:07.911706 UTC
-yes_train_test_split.py,train_test_split,true,2024-04-11 20:30:00.137470 UTC
-yes_train_test_split.py,train_test_split,true,2024-04-11 20:31:16.521683 UTC
-yes_train_test_split.py,train_test_split,true,2024-04-11 20:31:43.156391 UTC
-yes_train_test_split.py,train_test_split,train_test_split,true,2024-04-11 20:59:15.431071 UTC
-yes_train_test_split.py,stratify,stratify,false,2024-04-11 20:59:15.469465 UTC
-yes_train_test_split.py,train_test_split,train_test_split,true,2024-04-11 20:59:39.880743 UTC
-yes_train_test_split.py,stratify,stratify,false,2024-04-11 20:59:39.880962 UTC
-yes_train_test_split.py,train_test_split,train_test_split,true,2024-04-11 21:01:27.766906 UTC
-yes_train_test_split.py,stratify,stratify,false,2024-04-11 21:01:27.767123 UTC
-yes_train_test_split.py,train_test_split,train_test_split,true,2024-04-11 21:04:07.964555 UTC
-yes_train_test_split.py,stratify,stratify,false,2024-04-11 21:04:07.964766 UTC
-yes_train_test_split.py,train_test_split,Splits data into train and test,true,2024-04-11 21:06:32.150196 UTC
-yes_train_test_split.py,stratify,Ensures class balance in train and test datasets,false,2024-04-11 21:06:32.150409 UTC
-yes_train_test_split.py,train_test_split,Splits data into train and test,true,2024-04-11 21:08:37.172168 UTC
-yes_train_test_split.py,stratify,Ensures class balance in train and test datasets,false,2024-04-11 21:08:37.172371 UTC
-yes_train_test_split.py,train_test_split,Splits data into train and test,true,2024-04-11 21:16:18.152862 UTC
-yes_train_test_split.py,stratify,Ensures class balance in train and test datasets,false,2024-04-11 21:16:18.153071 UTC
-yes_train_test_split.py,random_state,Sets seed for reproducible train and test datasets,true,2024-04-11 21:16:18.153220 UTC
-no_train_test_split.py,train_test_split,Splits data into train and test,false,2024-04-11 21:16:37.156165 UTC
-no_train_test_split.py,stratify,Ensures class balance in train and test datasets,false,2024-04-11 21:16:37.156364 UTC
-no_train_test_split.py,random_state,Sets seed for reproducible train and test datasets,false,2024-04-11 21:16:37.156647 UTC
+file_name,target,description,detected,datetime
+no_train_test_split.py,train_test_split,Splits data into train and test,false,2024-04-17 21:19:05.618294 UTC
+no_train_test_split.py,stratify,Ensures class balance in train and test datasets,false,2024-04-17 21:19:05.618508 UTC
+no_train_test_split.py,random_state,Sets seed for reproducible train and test datasets,false,2024-04-17 21:19:05.618689 UTC
+no_train_test_split.py,train_test_split,Splits data into train and test,false,2024-04-17 21:19:46.615532 UTC
+no_train_test_split.py,stratify,Ensures class balance in train and test datasets,false,2024-04-17 21:19:46.616012 UTC
+no_train_test_split.py,random_state,Sets seed for reproducible train and test datasets,false,2024-04-17 21:19:46.616270 UTC
+yes_train_test_split.py,train_test_split,Splits data into train and test,true,2024-04-17 21:20:01.842477 UTC
+yes_train_test_split.py,stratify,Ensures class balance in train and test datasets,false,2024-04-17 21:20:01.843079 UTC
+yes_train_test_split.py,random_state,Sets seed for reproducible train and test datasets,true,2024-04-17 21:20:01.843441 UTC
+yes_train_test_split.py,sklearn,Imports the scikit-learn library,true,2024-04-17 21:31:20.775747 UTC
+yes_train_test_split.py,train_test_split,Splits data into train and test,true,2024-04-17 21:31:20.775947 UTC
+yes_train_test_split.py,stratify,Ensures class balance in train and test datasets,false,2024-04-17 21:31:20.776155 UTC
+yes_train_test_split.py,random_state,Sets seed for reproducible train and test datasets,true,2024-04-17 21:31:20.776372 UTC
+yes_train_test_split.py,sklearn,Imports the scikit-learn library,true,2024-04-17 21:35:54.462319 UTC
+yes_train_test_split.py,train_test_split,Splits data into train and test,true,2024-04-17 21:35:54.462536 UTC
+yes_train_test_split.py,stratify,Ensures class balance in train and test datasets,false,2024-04-17 21:35:54.462746 UTC
+yes_train_test_split.py,random_state,Sets seed for reproducible train and test datasets,true,2024-04-17 21:35:54.463037 UTC
+yes_train_test_split.py,sklearn,Imports the scikit-learn library,true,2024-04-17 21:39:16.826286 UTC
+yes_train_test_split.py,train_test_split,Splits data into train and test,true,2024-04-17 21:39:16.826539 UTC
+yes_train_test_split.py,stratify,Ensures class balance in train and test datasets,false,2024-04-17 21:39:16.826760 UTC
+yes_train_test_split.py,random_state,Sets seed for reproducible train and test datasets,true,2024-04-17 21:39:16.826949 UTC
+yes_train_test_split.py,sklearn,Imports the scikit-learn library,true,2024-04-17 21:43:52.205508 UTC
+yes_train_test_split.py,train_test_split,Splits data into train and test,true,2024-04-17 21:43:52.205682 UTC
+yes_train_test_split.py,stratify,Ensures class balance in train and test datasets,false,2024-04-17 21:43:52.205840 UTC
+yes_train_test_split.py,random_state,Sets seed for reproducible train and test datasets,true,2024-04-17 21:43:52.205994 UTC
+yes_train_test_split.py,sklearn,Imports the scikit-learn library,true,2024-04-17 21:44:47.536864 UTC
+yes_train_test_split.py,train_test_split,Splits data into train and test,true,2024-04-17 21:44:47.537072 UTC
+yes_train_test_split.py,stratify,Ensures class balance in train and test datasets,false,2024-04-17 21:44:47.537281 UTC
+yes_train_test_split.py,random_state,Sets seed for reproducible train and test datasets,true,2024-04-17 21:44:47.537556 UTC
+yes_train_test_split.py,sklearn,Imports the scikit-learn library,true,2024-04-17 21:46:06.234358 UTC
+yes_train_test_split.py,train_test_split,Splits data into train and test,true,2024-04-17 21:46:06.234525 UTC
+yes_train_test_split.py,stratify,Ensures class balance in train and test datasets,false,2024-04-17 21:46:06.234677 UTC
+yes_train_test_split.py,random_state,Sets seed for reproducible train and test datasets,true,2024-04-17 21:46:06.234827 UTC
+yes_train_test_split.py,sklearn,Imports the scikit-learn library,true,2024-04-17 21:46:27.805955 UTC
+yes_train_test_split.py,train_test_split,Splits data into train and test,true,2024-04-17 21:46:27.806157 UTC
+yes_train_test_split.py,stratify,Ensures class balance in train and test datasets,false,2024-04-17 21:46:27.806311 UTC
+yes_train_test_split.py,random_state,Sets seed for reproducible train and test datasets,true,2024-04-17 21:46:27.806436 UTC
+yes_train_test_split.py,sklearn,Imports the scikit-learn library,true,2024-04-17 21:58:38.319293 UTC
+yes_train_test_split.py,train_test_split,Splits data into train and test,true,2024-04-17 21:58:38.319453 UTC
+yes_train_test_split.py,stratify,Ensures class balance in train and test datasets,false,2024-04-17 21:58:38.319601 UTC
+yes_train_test_split.py,random_state,Sets seed for reproducible train and test datasets,true,2024-04-17 21:58:38.319744 UTC
+yes_train_test_split.py,sklearn,Imports the scikit-learn library,true,2024-04-17 21:58:58.317006 UTC
+yes_train_test_split.py,train_test_split,Splits data into train and test,true,2024-04-17 21:58:58.317337 UTC
+yes_train_test_split.py,stratify,Ensures class balance in train and test datasets,false,2024-04-17 21:58:58.317687 UTC
+yes_train_test_split.py,random_state,Sets seed for reproducible train and test datasets,true,2024-04-17 21:58:58.318128 UTC

@@ -2,9 +2,9 @@ use anyhow::{Context, Result};
 use chrono::Utc;
 use clap::Parser;
 use colored::*;
-use log::{info, error};
+use log::{info};
 use std::fs::{self, OpenOptions};
-use std::io::{self, Write};
+use std::io::{Write};
 use std::path::{Path, PathBuf};
 
 fn main() -> Result<()> {
@@ -13,6 +13,10 @@ fn main() -> Result<()> {
 
     // Define checks
     let checks = vec![
+        Check {
+            target: String::from("sklearn"),
+            description: String::from("Imports the scikit-learn library"),
+        },
         Check {
             target: String::from("train_test_split"),
             description: String::from("Splits data into train and test"),
@@ -46,6 +50,8 @@ fn main() -> Result<()> {
     if output_file.metadata()?.len() == 0 {
         write_csv_header(&mut output_file)?;
     }
+
+    display_mlcheck_header(&args.path);
 
     // Perform checks
     for check in &checks {
@@ -104,14 +110,33 @@ fn write_check_result(output_file: &mut fs::File, path: &PathBuf, check: &Check,
     .with_context(|| "Failed to write check result to CSV file")
 }
 
+fn display_mlcheck_header(path: &PathBuf) {
+
+     // Display "mlcheck" in ASCII art
+     let mlcheck = r#"                         
+     _ __ ___ | | ___| |__   ___  ___| | __
+    | '_ ` _ \| |/ __| '_ \ / _ \/ __| |/ /
+    | | | | | | | (__| | | |  __/ (__|   < 
+    |_| |_| |_|_|\___|_| |_|\___|\___|_|\_\
+ "#;
+ 
+     println!("{}", mlcheck.bold().truecolor(0, 165, 255).to_string());
+
+     println!("For the file: {}", path.file_name().expect("Could not get file name").to_string_lossy());
+    
+}
+
 /// Display the result of a check.
 fn display_check_result(check: &Check, pattern_found: bool) {
     let status = if pattern_found {
-        format!("present").bold().truecolor(0, 165, 255).to_string()
+        "present".bold().truecolor(0, 165, 255).to_string()
     } else {
-        format!("absent").bold().truecolor(255, 165, 0).to_string()
+        "absent".bold().truecolor(255, 165, 0).to_string()
     };
+
     println!("{}: {}", check.description, status);
+
+   
 }
 
 /// Command-line arguments structure.
