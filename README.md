@@ -14,4 +14,13 @@ To run `mlcheck` on a file you can run the following terminal command:
 
 `mlcheck --path path/to/your_file_name.py`
 
+To look back at all the past checks you've run using mlcheck you can query the mlcheck_output.db `sqlite` database that's automatically created when you run mlcheck for the first time. As long as you run `mlcheck` in the same folder, new checks will be appended to the database.
+
+`sqlite3 mlcheckoutput.db`
+`sqlite> select * from mlcheck_results`
+
+If you'd prefer to save your `mlcheck` results to a csv, run your commands like this
+
+`mlcheck --path path/to/your_file_name.py --output csv`
+
 Note: `mlcheck` is at an incredibly early stage and is under active development. Breaking changes are likely.

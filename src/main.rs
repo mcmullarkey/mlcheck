@@ -3,6 +3,8 @@ use chrono::Utc;
 use clap::Parser;
 use colored::*;
 use log::{info};
+use uuid::Uuid;
+use rusqlite::{params, Connection, Result as SqliteResult};
 use std::fs::{self, OpenOptions};
 use std::io::{Write};
 use std::path::{Path, PathBuf};
@@ -28,6 +30,10 @@ fn main() -> Result<()> {
         Check {
             target: String::from("random_state"),
             description: String::from("Sets seed for reproducible train and test datasets")
+        },
+        Check {
+            target: String::from("Pipeline"),
+            description: String::from("Uses a pipeline to guard against data leakage")
         }
     ];
 
@@ -38,31 +44,62 @@ fn main() -> Result<()> {
 
     let content = read_file_content(&args.path)?;
 
-    let output_path = Path::new(&args.output);
-
-    let mut output_file = OpenOptions::new()
-        .append(true)
-        .create(true)
-        .open(&output_path)
-        .with_context(|| format!("Could not open file `{}`", output_path.display()))?;
-
-    // Write CSV header if file is empty
-    if output_file.metadata()?.len() == 0 {
-        write_csv_header(&mut output_file)?;
-    }
-
     display_mlcheck_header(&args.path);
 
-    // Perform checks
-    for check in &checks {
-        let pattern_found = content.lines().any(|line| line.contains(&check.target));
+    match args.output.as_str() {
+        "csv" => {
+            let output_path = Path::new("mlcheck_output.csv");
+            let mut output_file = OpenOptions::new()
+                .append(true)
+                .create(true)
+                .open(&output_path)
+                .with_context(|| format!("Could not open file `{}`", output_path.display()))?;
 
-        write_check_result(&mut output_file, &args.path, &check, pattern_found)?;
+            // Write CSV header if file is empty
+            if output_file.metadata()?.len() == 0 {
+                write_csv_header(&mut output_file)?;
+            }
 
-        display_check_result(&check, pattern_found);
+            // Generate unique group identifier for this file
+            let group_id = generate_group_id();
+
+            // Perform checks
+            for check in &checks {
+                let pattern_found = content.lines().any(|line| line.contains(&check.target));
+
+                write_check_result(&mut output_file, &args.path, &check, pattern_found, &group_id)?;
+
+                display_check_result(&check, pattern_found);
+            }
+
+            info!("Results appended to {}", output_path.display());
+        },
+        "sql" => {
+            let conn = Connection::open("mlcheck_output.db").with_context(|| "Failed to open SQLite database")?;
+            create_table(&conn)?;
+
+            // Generate unique group identifier for this file
+            let group_id = generate_group_id();
+
+            // Perform checks
+            for check in &checks {
+                let pattern_found = content.lines().any(|line| line.contains(&check.target));
+
+                insert_check_result(&conn, &args.path, &check, pattern_found, &group_id)?;
+
+                display_check_result(&check, pattern_found);
+            }
+
+            info!("Results saved to SQLite database mlcheck_output.db");
+        },
+        _ => {
+            println!("Invalid output format specified. Please use 'csv' or 'sql'.");
+        }
     }
 
-    info!("Results appended to {}", output_path.display());
+    // Display percentage of checks that are present
+    let present_checks_percentage = calculate_present_checks_percentage(&checks, &content);
+    println!("Percentage of checks marked 'present': {:.2}%", present_checks_percentage);
 
     Ok(())
 }
@@ -91,20 +128,21 @@ fn read_file_content(path: &PathBuf) -> Result<String> {
 fn write_csv_header(output_file: &mut fs::File) -> Result<()> {
     writeln!(
         output_file,
-        "file_name,target,description,detected,datetime"
+        "file_name,target,description,detected,group_id,datetime"
     )
     .with_context(|| "Failed to write header to CSV file")
 }
 
-/// Write check result to the CSV file.
-fn write_check_result(output_file: &mut fs::File, path: &PathBuf, check: &Check, pattern_found: bool) -> Result<()> {
+/// Write check result to the CSV file with group identifier.
+fn write_check_result(output_file: &mut fs::File, path: &PathBuf, check: &Check, pattern_found: bool, group_id: &Uuid) -> Result<()> {
     writeln!(
         output_file,
-        "{},{},{},{},{}",
+        "{},{},{},{},{},{}",
         path.file_name().ok_or_else(|| anyhow::anyhow!("Could not get file name"))?.to_string_lossy(),
         check.target,
         check.description,
         pattern_found,
+        group_id,
         Utc::now()
     )
     .with_context(|| "Failed to write check result to CSV file")
@@ -139,6 +177,52 @@ fn display_check_result(check: &Check, pattern_found: bool) {
    
 }
 
+// Calculate % of checks that are present
+fn calculate_present_checks_percentage(checks: &[Check], content: &str) -> f64 {
+    let present_checks_count = checks.iter().filter(|check| {
+        content.lines().any(|line| line.contains(&check.target))
+    }).count();
+    let total_checks_count = checks.len();
+    present_checks_count as f64 / total_checks_count as f64 * 100.0
+}
+
+/// Generate a unique group identifier for each file.
+fn generate_group_id() -> Uuid {
+    Uuid::new_v4()
+}
+
+fn create_table(conn: &Connection) -> SqliteResult<()> {
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS mlcheck_results (
+             id INTEGER PRIMARY KEY,
+             file_name TEXT,
+             target TEXT,
+             description TEXT,
+             detected BOOLEAN,
+             group_id TEXT,
+             datetime TEXT
+         )",
+        [],
+    )?;
+    Ok(())
+}
+
+fn insert_check_result(conn: &Connection, path: &PathBuf, check: &Check, pattern_found: bool, group_id: &Uuid) -> SqliteResult<()> {
+    conn.execute(
+        "INSERT INTO mlcheck_results (file_name, target, description, detected, group_id, datetime)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+        params![
+            path.file_name().ok_or_else(|| rusqlite::Error::InvalidParameterName("Could not get file name".to_string()))?.to_string_lossy(),
+            check.target,
+            check.description,
+            pattern_found,
+            group_id.to_string(),
+            Utc::now().to_rfc3339()
+        ],
+    )?;
+    Ok(())
+}
+
 /// Command-line arguments structure.
 #[derive(Debug, Parser)]
 #[clap(name = "pattern_search")]
@@ -147,7 +231,7 @@ struct Cli {
     #[clap(short, long)]
     path: PathBuf,
     /// The name of the output CSV file
-    #[clap(short, long, default_value = "output.csv")]
+    #[clap(short, long, default_value = "sql")]
     output: String,
     /// Adding verbosity flag for debugging
     #[clap(flatten)]

@@ -1,0 +1,16 @@
+file_name,target,description,detected,group_id,datetime
+no_train_test_split.py,sklearn,Imports the scikit-learn library,true,88e68905-655f-4ec1-8d43-8060a5bdffba,2024-04-18 22:47:11.653923 UTC
+no_train_test_split.py,train_test_split,Splits data into train and test,false,88e68905-655f-4ec1-8d43-8060a5bdffba,2024-04-18 22:47:11.654130 UTC
+no_train_test_split.py,stratify,Ensures class balance in train and test datasets,false,88e68905-655f-4ec1-8d43-8060a5bdffba,2024-04-18 22:47:11.654339 UTC
+no_train_test_split.py,random_state,Sets seed for reproducible train and test datasets,false,88e68905-655f-4ec1-8d43-8060a5bdffba,2024-04-18 22:47:11.654543 UTC
+no_train_test_split.py,Pipeline,Uses a pipeline to guard against data leakage,false,88e68905-655f-4ec1-8d43-8060a5bdffba,2024-04-18 22:47:11.654738 UTC
+yes_train_test_split.py,sklearn,Imports the scikit-learn library,true,2325d57b-6254-4e86-b64e-0658c88bf9c0,2024-04-18 22:47:46.509609 UTC
+yes_train_test_split.py,train_test_split,Splits data into train and test,true,2325d57b-6254-4e86-b64e-0658c88bf9c0,2024-04-18 22:47:46.509825 UTC
+yes_train_test_split.py,stratify,Ensures class balance in train and test datasets,false,2325d57b-6254-4e86-b64e-0658c88bf9c0,2024-04-18 22:47:46.510011 UTC
+yes_train_test_split.py,random_state,Sets seed for reproducible train and test datasets,true,2325d57b-6254-4e86-b64e-0658c88bf9c0,2024-04-18 22:47:46.510179 UTC
+yes_train_test_split.py,Pipeline,Uses a pipeline to guard against data leakage,false,2325d57b-6254-4e86-b64e-0658c88bf9c0,2024-04-18 22:47:46.510403 UTC
+yes_train_test_split.py,sklearn,Imports the scikit-learn library,true,1b37543f-29be-4e75-b369-cb3817bdf66f,2024-04-18 22:48:42.411399 UTC
+yes_train_test_split.py,train_test_split,Splits data into train and test,true,1b37543f-29be-4e75-b369-cb3817bdf66f,2024-04-18 22:48:42.411582 UTC
+yes_train_test_split.py,stratify,Ensures class balance in train and test datasets,false,1b37543f-29be-4e75-b369-cb3817bdf66f,2024-04-18 22:48:42.411737 UTC
+yes_train_test_split.py,random_state,Sets seed for reproducible train and test datasets,true,1b37543f-29be-4e75-b369-cb3817bdf66f,2024-04-18 22:48:42.411886 UTC
+yes_train_test_split.py,Pipeline,Uses a pipeline to guard against data leakage,false,1b37543f-29be-4e75-b369-cb3817bdf66f,2024-04-18 22:48:42.412075 UTC
