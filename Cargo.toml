@@ -1,6 +1,6 @@
 [package]
 name = "mlcheck"
-version = "0.1.3"
+version = "0.1.4"
 authors = ["Michael Mullarkey <mullarkey.mike@gmail.com>"]
 license = "MIT OR Apache-2.0"
 description = "A tool to check files for ML best practices"

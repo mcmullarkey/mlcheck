@@ -42,11 +42,56 @@ fn main() -> Result<()> {
 
     validate_arguments(&args)?;
 
-    let content = read_file_content(&args.path)?;
+    if args.path.is_dir() {
+        handle_folder(&args.path, &args.output, &checks)?;
+    } else {
+        handle_file(&args.path, &args.output, &checks)?;
+    }
 
-    display_mlcheck_header(&args.path);
+    Ok(())
+}
 
-    match args.output.as_str() {
+/// Struct representing a check.
+#[derive(Debug)]
+struct Check {
+    target: String,
+    description: String,
+}
+
+/// Validate command-line arguments.
+fn validate_arguments(args: &Cli) -> Result<()> {
+    if !args.path.exists() {
+        return Err(anyhow::anyhow!("Input file does not exist"));
+    }
+    Ok(())
+}
+
+fn handle_folder(folder_path: &PathBuf, output_format: &str, checks: &[Check]) -> Result<()> {
+    let files_to_check = fs::read_dir(folder_path)
+        .with_context(|| format!("Failed to read directory `{}`", folder_path.display()))?
+        .filter_map(|entry| {
+            entry.ok().and_then(|e| {
+                if e.path().is_file() {
+                    Some(e.path())
+                } else {
+                    None
+                }
+            })
+        });
+
+    for file_path in files_to_check {
+        handle_file(&file_path, output_format, checks)?;
+    }
+
+    Ok(())
+}
+
+fn handle_file(file_path: &PathBuf, output_format: &str, checks: &[Check]) -> Result<()> {
+    let content = read_file_content(file_path)?;
+
+    display_mlcheck_header(file_path);
+
+    match output_format {
         "csv" => {
             let output_path = Path::new("mlcheck_output.csv");
             let mut output_file = OpenOptions::new()
@@ -64,12 +109,12 @@ fn main() -> Result<()> {
             let group_id = generate_group_id();
 
             // Perform checks
-            for check in &checks {
+            for check in checks {
                 let pattern_found = content.lines().any(|line| line.contains(&check.target));
 
-                write_check_result(&mut output_file, &args.path, &check, pattern_found, &group_id)?;
+                write_check_result(&mut output_file, file_path, check, pattern_found, &group_id)?;
 
-                display_check_result(&check, pattern_found);
+                display_check_result(check, pattern_found);
             }
 
             info!("Results appended to {}", output_path.display());
@@ -82,12 +127,12 @@ fn main() -> Result<()> {
             let group_id = generate_group_id();
 
             // Perform checks
-            for check in &checks {
+            for check in checks {
                 let pattern_found = content.lines().any(|line| line.contains(&check.target));
 
-                insert_check_result(&conn, &args.path, &check, pattern_found, &group_id)?;
+                insert_check_result(&conn, file_path, check, pattern_found, &group_id)?;
 
-                display_check_result(&check, pattern_found);
+                display_check_result(check, pattern_found);
             }
 
             info!("Results saved to SQLite database mlcheck_output.db");
@@ -98,24 +143,9 @@ fn main() -> Result<()> {
     }
 
     // Display percentage of checks that are present
-    let present_checks_percentage = calculate_present_checks_percentage(&checks, &content);
-    println!("Percentage of checks marked 'present': {:.2}%", present_checks_percentage);
+    let present_checks_percentage = calculate_present_checks_percentage(checks, &content);
+    println!("Percentage of checks marked 'present': {:.0}%", present_checks_percentage);
 
-    Ok(())
-}
-
-/// Struct representing a check.
-#[derive(Debug)]
-struct Check {
-    target: String,
-    description: String,
-}
-
-/// Validate command-line arguments.
-fn validate_arguments(args: &Cli) -> Result<()> {
-    if !args.path.exists() {
-        return Err(anyhow::anyhow!("Input file does not exist"));
-    }
     Ok(())
 }
 
