@@ -4,7 +4,7 @@
 
 Think of this tool as a spell-check equivalent for ML best practices.
 
-The current version can detect `scikit-learn` style Python code in .py or .ipynb (Jupyter Notebook) files.
+The current version can detect `scikit-learn` style Python code in .py or .ipynb (Jupyter Notebook) files and `tidymodels` style R code in .R or .Rmd files.
 
 # Install
 
@@ -44,7 +44,4 @@ The concept for this tool was in part inspired by the <a href="https://mbnuijten
 
 # Potential future features
 
-- Able to identify tensorflow style code
-- Able to identify keras style code
-- Ability to identify tidymodels style R code across .R, .Rmd, and .qmd file types
 - Add more specific, sophisticated regex across styles
