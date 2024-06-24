@@ -13,8 +13,8 @@ fn main() -> Result<()> {
     env_logger::init();
     info!("Starting up");
 
-    // Define checks
-    let checks = vec![
+    // Define Python and R checks
+    let py_checks = vec![
         Check {
             target: String::from("sklearn"),
             description: String::from("Imports the scikit-learn library"),
@@ -37,15 +37,38 @@ fn main() -> Result<()> {
         }
     ];
 
+    let r_checks = vec![
+        Check {
+            target: String::from("tidymodels"),
+            description: String::from("Imports the tidymodels library"),
+        },
+        Check {
+            target: String::from("initial_split"),
+            description: String::from("Splits data into train and test"),
+        },
+        Check {
+            target: String::from("strata"),
+            description: String::from("Ensures class balance in train and test datasets"),
+        },
+        Check {
+            target: String::from("set.seed"),
+            description: String::from("Sets seed for reproducible train and test datasets")
+        },
+        Check {
+            target: String::from("recipe"),
+            description: String::from("Uses a recipe to guard against data leakage")
+        }
+    ];
+
     // Parse command-line arguments
     let args = Cli::parse();
 
     validate_arguments(&args)?;
 
     if args.path.is_dir() {
-        handle_folder(&args.path, &args.output, &checks)?;
+        handle_folder(&args.path, &args.output, &py_checks, &r_checks)?;
     } else {
-        handle_file(&args.path, &args.output, &checks)?;
+        handle_file(&args.path, &args.output, &py_checks, &r_checks)?;
     }
 
     Ok(())
@@ -66,7 +89,7 @@ fn validate_arguments(args: &Cli) -> Result<()> {
     Ok(())
 }
 
-fn handle_folder(folder_path: &PathBuf, output_format: &str, checks: &[Check]) -> Result<()> {
+fn handle_folder(folder_path: &PathBuf, output_format: &str, py_checks: &[Check], r_checks: &[Check]) -> Result<()> {
     let files_to_check = fs::read_dir(folder_path)
         .with_context(|| format!("Failed to read directory `{}`", folder_path.display()))?
         .filter_map(|entry| {
@@ -80,16 +103,24 @@ fn handle_folder(folder_path: &PathBuf, output_format: &str, checks: &[Check]) -
         });
 
     for file_path in files_to_check {
-        handle_file(&file_path, output_format, checks)?;
+        handle_file(&file_path, output_format, py_checks, r_checks)?;
     }
 
     Ok(())
 }
 
-fn handle_file(file_path: &PathBuf, output_format: &str, checks: &[Check]) -> Result<()> {
+fn handle_file(file_path: &PathBuf, output_format: &str, py_checks: &[Check], r_checks: &[Check]) -> Result<()> {
     let content = read_file_content(file_path)?;
 
     display_mlcheck_header(file_path);
+
+    let extension = file_path.extension().and_then(|ext| ext.to_str());
+
+    let checks = match extension {
+        Some("py") | Some("ipynb") => py_checks,
+        Some("R") | Some("Rmd") => r_checks,
+        _ => return Err(anyhow::anyhow!("Unsupported file extension")),
+    };
 
     match output_format {
         "csv" => {
@@ -179,19 +210,14 @@ fn write_check_result(output_file: &mut fs::File, path: &PathBuf, check: &Check,
 }
 
 fn display_mlcheck_header(path: &PathBuf) {
-
-     // Display "mlcheck" in ASCII art
-     let mlcheck = r#"                         
+    let mlcheck = r#"                         
      _ __ ___ | | ___| |__   ___  ___| | __
     | '_ ` _ \| |/ __| '_ \ / _ \/ __| |/ /
     | | | | | | | (__| | | |  __/ (__|   < 
     |_| |_| |_|_|\___|_| |_|\___|\___|_|\_\
  "#;
- 
-     println!("{}", mlcheck.bold().truecolor(0, 165, 255).to_string());
-
-     println!("For the file: {}", path.file_name().expect("Could not get file name").to_string_lossy());
-    
+    println!("{}", mlcheck.bold().truecolor(0, 165, 255).to_string());
+    println!("For the file: {}", path.file_name().expect("Could not get file name").to_string_lossy());
 }
 
 /// Display the result of a check.
@@ -203,8 +229,6 @@ fn display_check_result(check: &Check, pattern_found: bool) {
     };
 
     println!("{}: {}", check.description, status);
-
-   
 }
 
 // Calculate % of checks that are present
@@ -267,6 +291,7 @@ struct Cli {
     #[clap(flatten)]
     verbose: clap_verbosity_flag::Verbosity,
 }
+
 
 
 
