@@ -1,47 +1,119 @@
 # mlcheck
 
-`mlcheck` is a command line tool to check for ML best practices in different coding documents.
+`mlcheck` is a command-line tool that checks ML code for best practices. Think of it as a spell checker for machine learning workflows.
 
-Think of this tool as a spell-check equivalent for ML best practices.
+It scans Python (scikit-learn) and R (tidymodels) code to verify that common best practices are being followed: proper train/test splitting, stratification, reproducibility seeds, and data leakage prevention via pipelines or recipes.
 
-The current version can detect `scikit-learn` style Python code in .py or .ipynb (Jupyter Notebook) files and `tidymodels` style R code in .R or .Rmd files.
+## Checks
 
-# Install
+### Python / scikit-learn
 
-If you have Rust and Cargo installed (see <a href="https://www.rust-lang.org/tools/install" target="_blank">this resource</a> if you haven't), you can install `mlcheck` from <a href="https://crates.io/" target="_blank">crates.io</a> using:
+| Check | What it looks for |
+|-------|-------------------|
+| Library import | `import sklearn` or `from sklearn ...` |
+| Train/test split | `train_test_split()` |
+| Stratification | `stratify=` parameter |
+| Reproducibility | `random_state=` parameter |
+| Data leakage prevention | `Pipeline()` or `make_pipeline()` |
 
-`cargo install mlcheck`
+### R / tidymodels
 
-# Running mlcheck
+| Check | What it looks for |
+|-------|-------------------|
+| Library import | `library(tidymodels)` |
+| Train/test split | `initial_split()` |
+| Stratification | `strata=` parameter |
+| Reproducibility | `set.seed()` |
+| Data leakage prevention | `recipe()` |
 
-To run `mlcheck` on a file you can run the following terminal command:
+All checks are **context-aware** -- patterns that appear only in comments are not counted as present.
 
-`mlcheck --path path/to/your_file_name.py`
+## Supported file types
 
-To run `mlcheck` on a folder with .py and/or .ipynb files you can run the following terminal command:
+- `.py` -- Python scripts
+- `.ipynb` -- Jupyter notebooks (only code cells are scanned; markdown cells are ignored)
+- `.R` -- R scripts
+- `.Rmd` -- R Markdown files
 
-`mlcheck --path path/to/folder/`
+## Install
 
-# Analyzing mlcheck results
+With [Rust and Cargo](https://www.rust-lang.org/tools/install) installed:
 
-To look back at all the past checks you've run using mlcheck you can query the mlcheck_output.db `sqlite` database that's automatically created when you run mlcheck for the first time. As long as you run `mlcheck` in the same folder, new checks will be appended to the database.
+```sh
+cargo install mlcheck
+```
 
-`sqlite3 mlcheckoutput.db`
+## Usage
 
-`sqlite> select * from mlcheck_results`
+Check a single file:
 
-If you'd prefer to save your `mlcheck` results to a csv, run your commands like this
+```sh
+mlcheck --path path/to/your_file.py
+```
 
-`mlcheck --path path/to/your_file_name.py --output csv`
+Check all supported files in a directory:
 
-# Disclaimer
+```sh
+mlcheck --path path/to/folder/
+```
 
-Note: `mlcheck` is at an incredibly early stage and is under active development. Breaking changes are likely.
+### Output formats
 
-# Acknowledgements
+By default, results are printed to the console. You can also save results to CSV or SQLite:
 
-The concept for this tool was in part inspired by the <a href="https://mbnuijten.com/statcheck/" target="_blank">statcheck</a> project.
+```sh
+# Save to CSV
+mlcheck --path your_file.py --output csv
 
-# Potential future features
+# Save to SQLite database
+mlcheck --path your_file.py --output sql
+```
 
-- Add more specific, sophisticated regex across styles
+Output files are written to your platform's data directory by default:
+
+- **macOS**: `~/Library/Application Support/mlcheck/`
+- **Linux**: `~/.local/share/mlcheck/`
+
+You can override this with `--output-dir`:
+
+```sh
+mlcheck --path your_file.py --output csv --output-dir ./results
+```
+
+### Querying past results
+
+To review all past checks stored in the SQLite database:
+
+```sh
+sqlite3 ~/Library/Application\ Support/mlcheck/mlcheck_output.db "SELECT * FROM mlcheck_results"
+```
+
+## Development
+
+### Running tests
+
+```sh
+cargo test
+```
+
+### Mutation testing
+
+[cargo-mutants](https://mutants.rs/) is used to verify test robustness:
+
+```sh
+cargo install cargo-mutants
+cargo mutants
+```
+
+## Architecture
+
+The codebase follows a **functional core, imperative shell** pattern:
+
+- **Pure core** (`domain/`, `rules/`): types, check evaluation, pattern matching, scoring -- no I/O, fully deterministic and testable
+- **I/O shell** (`scanner/`, `reporter/`, `cli.rs`, `lib.rs`): file reading, directory walking, console/CSV/SQLite output
+
+Development follows **BDD dual-loop TDD**: integration tests define expected behavior from the outside in, unit tests drive internal implementation.
+
+## Acknowledgements
+
+The concept for this tool was in part inspired by the [statcheck](https://mbnuijten.com/statcheck/) project.
