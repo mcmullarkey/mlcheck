@@ -2,4 +2,7 @@
 /mutants.out
 /mutants.out.old
 .DS_Store
+mlcheck_output.csv
+mlcheck_output.db
+*.bak
 
