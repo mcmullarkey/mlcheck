@@ -97,7 +97,6 @@ fn given_r_file_missing_practices_then_absent_shown() {
         .stdout(predicate::str::contains("20%"));
 }
 
-#[test]
 // --- Notebook integration tests ---
 
 #[test]
@@ -130,6 +129,7 @@ fn given_notebook_with_sklearn_only_in_markdown_then_all_absent() {
         .stdout(predicate::str::contains("0%"));
 }
 
+#[test]
 fn given_r_file_with_only_comments_then_all_absent() {
     Command::cargo_bin("mlcheck")
         .unwrap()
