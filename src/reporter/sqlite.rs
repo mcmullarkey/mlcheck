@@ -9,7 +9,7 @@ use crate::error::MlCheckError;
 pub fn report_to_sqlite(report: &FileReport, output_dir: &Path) -> Result<(), MlCheckError> {
     let db_path = output_dir.join("mlcheck_output.db");
 
-    let conn = Connection::open(&db_path).map_err(|e| MlCheckError::SqliteError(e))?;
+    let conn = Connection::open(&db_path).map_err(MlCheckError::SqliteError)?;
 
     conn.execute(
         "CREATE TABLE IF NOT EXISTS mlcheck_results (
@@ -23,7 +23,7 @@ pub fn report_to_sqlite(report: &FileReport, output_dir: &Path) -> Result<(), Ml
         )",
         [],
     )
-    .map_err(|e| MlCheckError::SqliteError(e))?;
+    .map_err(MlCheckError::SqliteError)?;
 
     let file_name = report
         .file_info
@@ -49,7 +49,7 @@ pub fn report_to_sqlite(report: &FileReport, output_dir: &Path) -> Result<(), Ml
                 report.timestamp,
             ],
         )
-        .map_err(|e| MlCheckError::SqliteError(e))?;
+        .map_err(MlCheckError::SqliteError)?;
     }
 
     Ok(())
